@@ -24,5 +24,7 @@ public class StarcrestaddonsClient implements ClientModInitializer {
             TestBase64Command.register(dispatcher);
         });
         LOGGER.info("Test commands registered");
+
+        LOGGER.info("Image preview system initialized");
     }
 }

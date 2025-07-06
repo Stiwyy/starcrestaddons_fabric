@@ -1,14 +1,14 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.stiwy.starcrestaddons.mixin",
+  "package": "me.stiwy.starcrestaddons.client.mixins",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
+  "refmap": "starcrestaddons.refmap.json",
+  "mixins": [],
+  "client": [
+    "InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "overwrites": {
-    "requireAnnotations": true
   }
 }
