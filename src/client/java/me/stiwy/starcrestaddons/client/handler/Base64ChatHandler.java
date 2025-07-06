@@ -25,7 +25,7 @@ public class Base64ChatHandler {
     // Original pattern from ChatTriggers: "&r&2Guild > ${*} ${bot} ${*}: &r${player}${separator} [Image] ${msg}&r"
     // This matches messages like: "§r§2Guild > [VIP] MAChatbridge [EQUITE]: §rPlayerName » [Image] base64content§r"
     private static final Pattern GUILD_BASE64_PATTERN = Pattern.compile(
-        "§r§2Guild > .*?(\\w+).*?: §r(\\w+)([^\\[]*) \\[Image\\] (.+?)§r"
+        "§r§2Guild > \\[VIP\\] (\\w+) \\[EQUITE\\]: §r(\\w+)([^\\[]*) \\[Image\\] (.+?)§r"
     );
     
     // Alternative pattern for different message formats
@@ -53,52 +53,70 @@ public class Base64ChatHandler {
         
         LOGGER.debug("Checking message: {}", formattedText);
         
-        Matcher matcher = GUILD_BASE64_PATTERN.matcher(formattedText);
-        if (!matcher.find()) {
-            // Try alternative pattern
-            matcher = GUILD_BASE64_PATTERN_ALT.matcher(formattedText);
+        // Log all Guild messages for debugging
+        if (formattedText.contains("§2Guild >")) {
+            LOGGER.info("Guild message detected: {}", formattedText);
         }
         
-        if (matcher.find()) {
-            String bot = matcher.group(1);
-            String player = matcher.group(2);
-            String separator = matcher.group(3);
-            String base64Message = matcher.group(4);
+        Matcher matcher = GUILD_BASE64_PATTERN.matcher(formattedText);
+        boolean firstPatternMatched = matcher.find();
+        
+        if (!firstPatternMatched) {
+            // Try alternative pattern
+            matcher = GUILD_BASE64_PATTERN_ALT.matcher(formattedText);
+            boolean altPatternMatched = matcher.find();
             
-            LOGGER.debug("Found potential base64 message - Bot: {}, Player: {}, Message: {}", bot, player, base64Message);
-            
-            // Check if the bot name matches our configured bot
-            if (!ModConfig.getBotName().toLowerCase().equals(bot.toLowerCase())) {
-                LOGGER.debug("Bot name '{}' doesn't match configured '{}'", bot, ModConfig.getBotName());
-                return false; // Don't cancel message, not our bot
+            if (altPatternMatched) {
+                LOGGER.debug("Alternative pattern matched");
             }
-            
-            LOGGER.debug("Processing base64 message from {}: {}", player, base64Message);
-            
-            // Decode the base64 content
-            String decodedLink = Base64Decoder.decode(base64Message.trim());
-            
-            if (!decodedLink.isEmpty() && Base64Decoder.isBase64(base64Message.trim())) {
-                // Create the replacement message with proper formatting
-                MutableText replacementMessage = Text.literal("Guild > ")
-                    .formatted(Formatting.DARK_GREEN)
-                    .append(Text.literal("[VIP] MAChatbridge ")
-                        .formatted(Formatting.GREEN))
-                    .append(Text.literal("[EQUITE] ")
-                        .formatted(Formatting.GOLD))
-                    .append(Text.literal(player + " » " + decodedLink)
-                        .formatted(Formatting.WHITE));
+        } else {
+            LOGGER.debug("Primary pattern matched");
+        }
+        
+        if (matcher.find() || firstPatternMatched) {
+            // Reset matcher to get groups properly
+            matcher = firstPatternMatched ? GUILD_BASE64_PATTERN.matcher(formattedText) : GUILD_BASE64_PATTERN_ALT.matcher(formattedText);
+            if (matcher.find()) {
+                String bot = matcher.group(1);
+                String player = matcher.group(2);
+                String separator = matcher.group(3);
+                String base64Message = matcher.group(4);
                 
-                // Send the new message to chat
-                MinecraftClient client = MinecraftClient.getInstance();
-                if (client.player != null) {
-                    client.player.sendMessage(replacementMessage, false);
+                LOGGER.info("Found potential base64 message - Bot: {}, Player: {}, Message: {}", bot, player, base64Message);
+                
+                // Check if the bot name matches our configured bot
+                if (!ModConfig.getBotName().toLowerCase().equals(bot.toLowerCase())) {
+                    LOGGER.debug("Bot name '{}' doesn't match configured '{}'", bot, ModConfig.getBotName());
+                    return false; // Don't cancel message, not our bot
                 }
                 
-                LOGGER.info("Decoded base64 message for {}: {}", player, decodedLink);
-                return true; // Cancel the original message
-            } else {
-                LOGGER.debug("Failed to decode or not valid base64: {}", base64Message);
+                LOGGER.info("Processing base64 message from {}: {}", player, base64Message);
+                
+                // Decode the base64 content
+                String decodedLink = Base64Decoder.decode(base64Message.trim());
+                
+                if (!decodedLink.isEmpty() && Base64Decoder.isBase64(base64Message.trim())) {
+                    // Create the replacement message with proper formatting
+                    MutableText replacementMessage = Text.literal("Guild > ")
+                        .formatted(Formatting.DARK_GREEN)
+                        .append(Text.literal("[VIP] MAChatbridge ")
+                            .formatted(Formatting.GREEN))
+                        .append(Text.literal("[EQUITE] ")
+                            .formatted(Formatting.GOLD))
+                        .append(Text.literal(player + " » " + decodedLink)
+                            .formatted(Formatting.WHITE));
+                    
+                    // Send the new message to chat
+                    MinecraftClient client = MinecraftClient.getInstance();
+                    if (client.player != null) {
+                        client.player.sendMessage(replacementMessage, false);
+                    }
+                    
+                    LOGGER.info("Successfully decoded base64 message for {}: {}", player, decodedLink);
+                    return true; // Cancel the original message
+                } else {
+                    LOGGER.debug("Failed to decode or not valid base64: {}", base64Message);
+                }
             }
         }
         
