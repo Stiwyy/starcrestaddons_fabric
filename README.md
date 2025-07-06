@@ -1,6 +1,6 @@
 # Starcrest Addons
 
-**Starcrest Addons** is a mod for Hypixel players who use a bridge-bot that is able to send base64 encoded image links in this format: [Image] `base64-code`. It has the following key features for now:  
+**Starcrest Addons** is a mod for Hypixel players who use a bridge-bot that is able to send base64 encoded image links in this format: `[Image] base64-code`. It has the following key features for now:  
 
 - **Base64 Link Decoder** – Automatically decodes Base64-encoded links in chat and turns them into clickable URLs.  
 - **Built-in Imgur Image Viewer** – Instantly view Imgur images in-game without having to open your browser.  
