@@ -1,35 +1,37 @@
 {
   "schemaVersion": 1,
   "id": "starcrestaddons",
-  "version": "${version}",
-  "name": "starcrestaddons",
-  "description": "The StarcrestAddons module as a mod with the key features for the weirdos using 1.21.5",
-  "authors": [],
-  "contact": {},
-  "license": "All-Rights-Reserved",
+  "version": "1.0.0",
+  "name": "Starcrest Addons",
+  "description": "Adds base64 link decoding and image viewing features for Hypixel bridge bots",
+  "authors": [
+    "Stiwyy"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Stiwyy/starcrestaddons_fabric",
+    "sources": "https://github.com/Stiwyy/starcrestaddons_fabric"
+  },
+  "license": "MIT",
   "icon": "assets/starcrestaddons/icon.png",
   "environment": "client",
   "entrypoints": {
-    "fabric-datagen": [
-      "me.stiwy.starcrestaddons.client.StarcrestaddonsDataGenerator"
+    "main": [
+      "me.stiwy.starcrestaddons.Starcrestaddons"
     ],
     "client": [
       "me.stiwy.starcrestaddons.client.StarcrestaddonsClient"
-    ],
-    "main": [
-      "me.stiwy.starcrestaddons.Starcrestaddons"
     ]
   },
   "mixins": [
-    "starcrestaddons.mixins.json",
-    {
-      "config": "starcrestaddons.client.mixins.json",
-      "environment": "client"
-    }
+    "starcrestaddons.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "fabricloader": ">=0.16.9",
+    "minecraft": "~1.21.5",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
   }
 }
